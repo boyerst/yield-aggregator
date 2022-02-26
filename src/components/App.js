@@ -60,6 +60,7 @@ class App extends Component {
 		}
 	}
 
+  // Connect to blockchain using web3
 	async loadBlockchainData(dispatch) {
 		const web3 = new Web3(window.ethereum)
 		this.setState({ web3 })
@@ -115,12 +116,13 @@ class App extends Component {
 		}
 	}
 
+  // Logic to deposit DAI
 	async depositHandler() {
 		if (this.state.walletBalance === "0") {
 			window.alert('No funds in wallet')
 			return
 		}
-
+    // If amount trying to deposit if more that what it is user wallet...
 		if (Number(this.state.amountToDeposit) > Number(this.state.walletBalance)) {
 			window.alert('Insufficient funds')
 			return
@@ -132,9 +134,16 @@ class App extends Component {
 		}
 
 		const amount = this.state.web3.utils.toWei(this.state.amountToDeposit.toString(), 'ether')
+    // We get the APYs using our /helpers
+      // He said the proper way to do this would be to implement it on chain
+      // We are just getting them directly from the blockchain
 		const compAPY = await getCompoundAPY(this.state.cDAI_contract)
 		const aaveAPY = await getAaveAPY(this.state.aaveLendingPool_contract)
 
+    // Call approve() the users address and chosen # DAI for interaction with the contract
+      // .approve().send().on()
+    // When approval done we call the aggregator deposit method and inject the APYs we fetched above
+      // .deposit().send().on().loadAccountInfo()
 		this.state.dai.methods.approve(this.state.aggregator._address, amount).send({ from: this.state.account })
 			.on('transactionHash', () => {
 				this.state.aggregator.methods.deposit(

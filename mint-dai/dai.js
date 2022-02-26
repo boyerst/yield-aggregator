@@ -4,6 +4,7 @@ const web3 = new Web3('http://127.0.0.1:7545');
 const daiAbi = require('./dai-abi.json');
 
 // Address of DAI contract https://etherscan.io/address/0x6b175474e89094c44da98b954eedeac495271d0f
+  // This is on the mainnet
 const daiMainNetAddress = '0x6b175474e89094c44da98b954eedeac495271d0f';
 
 // Address of Join (has auth) https://changelog.makerdao.com/ -> releases -> contract addresses -> MCD_JOIN_DAI
@@ -19,6 +20,8 @@ web3.eth.getAccounts().then((ganacheAccounts) => {
     // 1000 DAI
     const numbDaiToMint = web3.utils.toWei('1000', 'ether');
 
+    // We mint the DAI from our Ganache CLI account using the mint function from the DAI contract
+      // The way DAI works is that it collateralizes Ether and creates a stable currency, DAI
     return daiContract.methods.mint(accounts[0], numbDaiToMint)
         .send({
             from: daiMcdJoin,
