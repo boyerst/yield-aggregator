@@ -132,7 +132,8 @@ class App extends Component {
 			window.alert('Cannot be 0 or negative')
 			return
 		}
-
+    // amoutToDeposit is e.target.value from the input 
+    // We call on web3 toWei utils to convert the amount of DAI to wei
 		const amount = this.state.web3.utils.toWei(this.state.amountToDeposit.toString(), 'ether')
     // We get the APYs using our /helpers
       // He said the proper way to do this would be to implement it on chain
@@ -140,15 +141,16 @@ class App extends Component {
 		const compAPY = await getCompoundAPY(this.state.cDAI_contract)
 		const aaveAPY = await getAaveAPY(this.state.aaveLendingPool_contract)
 
-    // Call approve() the users address and chosen # DAI for interaction with the contract
-      // .approve().send().on()
-    // When approval done we call the aggregator deposit method and inject the APYs we fetched above
-      // .deposit().send().on().loadAccountInfo()
+    // Use method.MyMethod.send() twice
+      // 1. To .send() an approval transaction with the approve() method for interaction with the aggregator.addess from senders' account
+        // ...returns a transactionHash as PromiEvent event emitter
+        //  .on(receiptOfTransactionHash)...execute the second .send() method
+      // 2. To send a deposit transaction witht he deposit() method to deposit the approved amount, along with the fetched() APYs from the sender's account
+        //...returns a transactionHash as a PromiEvent event emitter
+        //  .on(receiptOfTransactionHash)...execute loadAccountInfo() to show updated balances of user and aggregator
 		this.state.dai.methods.approve(this.state.aggregator._address, amount).send({ from: this.state.account })
 			.on('transactionHash', () => {
-				this.state.aggregator.methods.deposit(
-					amount, compAPY, aaveAPY
-				).send({ from: this.state.account })
+        this.state.aggregator.methods.deposit(amount, compAPY, aaveAPY).send({ from: this.state.account })
 					.on('transactionHash', () => {
 						this.loadAccountInfo()
 					})
